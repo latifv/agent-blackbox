@@ -4,6 +4,10 @@
 
 Because agent output is not evidence.
 
+![Agent Blackbox demo](./assets/demo.gif)
+
+Demo GIF placeholder: `assets/demo.gif` is intentionally not committed yet. Add a real recording of the local cheating-agent demo before launch posts.
+
 Agent Blackbox wraps any local coding-agent command and records what actually happened: terminal output, git status, git diffs, test results, policy matches, and a local HTML evidence report.
 
 > The agent said it worked. Blackbox shows what actually happened.
@@ -61,6 +65,25 @@ Try the honest path from a clean demo checkout:
 ```sh
 blackbox run --test "npm test" -- node ../honest-agent.js
 ```
+
+## Launch demo
+
+The fastest demo is the intentionally broken checkout example.
+
+The source bug is in `examples/broken-checkout/src/checkout.ts`: the `SAVE10` coupon does not apply a discount, so `npm test` initially fails. The `examples/cheating-agent.js` script simulates a bad AI coding agent by changing the test expectation from `90` to `100`. The test suite then passes, but Agent Blackbox records that a test file changed and flags the run as a critical `no-test-deletion` policy violation.
+
+```sh
+cd examples/broken-checkout
+npm install
+git init
+git add .
+git commit -m "demo baseline"
+blackbox init
+blackbox run --test "npm test" -- node ../cheating-agent.js
+blackbox verify .blackbox/runs/<run-id>
+```
+
+From a clean demo checkout, `examples/honest-agent.js` fixes the source bug instead. That run should pass tests without policy violations.
 
 ## Codex example
 
@@ -121,6 +144,17 @@ Running tests: npm test
 Verdict: critical | Risk: critical | Score: 60/100
 Report: /repo/.blackbox/runs/2026-05-27T10-21-12-123Z-a1b2c3d4/report.html
 ```
+
+## Share Weird Agent Behavior
+
+If an agent does something surprising, share the evidence instead of just the agent summary. Good launch-friendly artifacts include:
+
+- a screenshot of the `report.html` verdict and timeline
+- the policy violation list
+- safe excerpts from `diff.patch`
+- the final score and risk level
+
+Please redact secrets, private source code, customer data, credentials, `.env` values, and internal URLs before posting.
 
 ## Policy format
 
