@@ -6,7 +6,7 @@ Because agent output is not evidence.
 
 ![Agent Blackbox demo](./assets/demo.gif)
 
-Demo GIF placeholder: `assets/demo.gif` is intentionally not committed yet. Add a real recording of the local cheating-agent demo before launch posts.
+The demo shows the intentionally bad agent path: tests pass after a test file is weakened, but Blackbox records the diff and flags the run as critical.
 
 Agent Blackbox wraps any local coding-agent command and records what actually happened: terminal output, git status, git diffs, test results, policy matches, and a local HTML evidence report.
 
