@@ -1,10 +1,14 @@
 # Agent Blackbox
 
+[![CI](https://github.com/latifv/agent-blackbox/actions/workflows/ci.yml/badge.svg)](https://github.com/latifv/agent-blackbox/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](./LICENSE)
+[![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](https://nodejs.org/)
+
 **A flight recorder for AI agents.**
 
-Because agent output is not evidence.
-
 ![Agent Blackbox demo](./assets/demo.gif)
+
+Because agent output is not evidence.
 
 This is an actual CLI demo captured from a local `blackbox run`: tests pass after a test file is weakened, but Blackbox records the diff and flags the run as critical.
 
