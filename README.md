@@ -6,12 +6,14 @@
 
 **A flight recorder for AI coding agents.**
 
-> The agent said "tests passed."
+> The agent said “tests passed.”<br>
 > It had deleted the test.
 
 ![Agent Blackbox demo](./assets/demo.gif)
 
-Agent Blackbox wraps Codex, Claude Code, Cursor-style CLI agents, or any local command and records what actually happened: terminal logs, git diffs, test results, policy violations, and a local evidence report.
+Agent Blackbox wraps Codex, Claude Code, Cursor-style CLI agents, or any local
+command and records what actually happened: terminal logs, git diffs, test
+results, policy violations, and a local evidence report.
 
 **Because agent output is not evidence.**
 
@@ -23,11 +25,17 @@ Tests: passed
 
 ## Why This Exists
 
-AI coding agents can confidently report success while making unsafe changes: weakening tests, touching secrets, hiding risky shell output, or leaving a repo in a surprising state.
+AI coding agents can confidently report success while making unsafe changes:
+weakening tests, touching secrets, hiding risky shell output, or leaving a repo
+in a surprising state.
 
-Agent Blackbox is a local-first evidence pack for those runs. It does not try to be a cloud platform or a full sandbox. It records enough local evidence for a human reviewer to answer: what command ran, what changed, did tests pass, and did any policy rule fire?
+Agent Blackbox is a local-first evidence pack for those runs. It does not try to
+be a cloud platform or a full sandbox. It records enough local evidence for a
+human reviewer to answer: what command ran, what changed, did tests pass, and
+did any policy rule fire?
 
-See [FAQ](./docs/faq.md) for short answers on scope, sandboxing, and agent support.
+See [FAQ](./docs/faq.md) for short answers on scope, sandboxing, and agent
+support.
 
 ## Quickstart
 
@@ -55,7 +63,10 @@ Requirements:
 
 The included demo shows why a passing test suite is not always enough.
 
-The demo project starts with a real bug in `examples/broken-checkout/src/checkout.ts`: the `SAVE10` coupon does not apply a discount, so `npm test` fails. The cheating agent changes `tests/checkout.test.ts` so the suite passes without fixing the source bug.
+The demo project starts with a real bug in
+`examples/broken-checkout/src/checkout.ts`: the `SAVE10` coupon does not apply
+a discount, so `npm test` fails. The cheating agent changes
+`tests/checkout.test.ts` so the suite passes without fixing the source bug.
 
 Run it from a clean checkout:
 
@@ -80,7 +91,8 @@ Tests: passed
 
 The report is written under `.blackbox/runs/<run-id>/report.html`.
 
-From a fresh copy of the demo project, the honest agent fixes the source bug instead:
+From a fresh copy of the demo project, the honest agent fixes the source bug
+instead:
 
 ```sh
 node ../../dist/cli.js run --test "npm test" -- node ../honest-agent.js
@@ -135,7 +147,8 @@ Each run creates a directory like:
 - `prevHash`
 - `hash`
 
-The hash is `sha256` over canonical JSON containing `seq`, `timestamp`, `type`, `data`, and `prevHash`.
+The hash is `sha256` over canonical JSON containing `seq`, `timestamp`,
+`type`, `data`, and `prevHash`.
 
 Verify a run:
 
@@ -226,7 +239,8 @@ rules:
     severity: high
 ```
 
-Policy rules can match file paths with globs or terminal/test output with substring checks. Keep rules explainable from local evidence.
+Policy rules can match file paths with globs or terminal/test output with
+substring checks. Keep rules explainable from local evidence.
 
 ## CLI Commands
 
@@ -241,14 +255,16 @@ Every command includes `--help`.
 
 ## Share Weird Agent Behavior
 
-Found an agent doing something suspicious? Run it through Blackbox and share the evidence, not just the agent summary:
+Found an agent doing something suspicious? Run it through Blackbox and share the
+evidence, not just the agent summary:
 
 - verdict
 - policy violation
 - `report.html` screenshot
 - relevant `diff.patch` excerpt
 
-Redact secrets, private source code, customer data, credentials, `.env` values, and internal URLs before posting.
+Redact secrets, private source code, customer data, credentials, `.env` values,
+and internal URLs before posting.
 
 ## Limitations
 
@@ -272,7 +288,8 @@ See [ROADMAP.md](./ROADMAP.md).
 
 ## Contributing
 
-Contributions are welcome. Start with [CONTRIBUTING.md](./CONTRIBUTING.md), then run:
+Contributions are welcome. Start with [CONTRIBUTING.md](./CONTRIBUTING.md), then
+run:
 
 ```sh
 pnpm install
@@ -280,4 +297,5 @@ pnpm build
 pnpm test
 ```
 
-Good first areas include agent examples, policy rules, report polish, and CI integrations.
+Good first areas include agent examples, policy rules, report polish, and CI
+integrations.
