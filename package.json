@@ -5,17 +5,41 @@
   "license": "Apache-2.0",
   "type": "module",
   "packageManager": "pnpm@10.34.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/latifv/agent-blackbox.git"
+  },
+  "bugs": {
+    "url": "https://github.com/latifv/agent-blackbox/issues"
+  },
+  "homepage": "https://github.com/latifv/agent-blackbox#readme",
+  "keywords": [
+    "ai-agents",
+    "coding-agents",
+    "developer-tools",
+    "agent-security",
+    "ai-observability",
+    "audit-log",
+    "codex",
+    "cli",
+    "typescript"
+  ],
   "bin": {
     "blackbox": "./dist/cli.js"
   },
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md",
+    "docs",
+    "examples",
+    "policies"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "tsx src/cli.ts"
+    "dev": "tsx src/cli.ts",
+    "test": "node scripts/smoke-test.mjs"
   },
   "engines": {
     "node": ">=20"

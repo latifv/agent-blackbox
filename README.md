@@ -4,36 +4,45 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](./LICENSE)
 [![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](https://nodejs.org/)
 
-**A flight recorder for AI agents.**
+**A flight recorder for AI coding agents.**
+
+> The agent said "tests passed."
+> It had deleted the test.
 
 ![Agent Blackbox demo](./assets/demo.gif)
 
-Because agent output is not evidence.
+Agent Blackbox wraps Codex, Claude Code, Cursor-style CLI agents, or any local command and records what actually happened: terminal logs, git diffs, test results, policy violations, and a local evidence report.
 
-This is an actual CLI demo captured from a local `blackbox run`: tests pass after a test file is weakened, but Blackbox records the diff and flags the run as critical.
+**Because agent output is not evidence.**
 
-Agent Blackbox wraps any local coding-agent command and records what actually happened: terminal output, git status, git diffs, test results, policy matches, and a local HTML evidence report.
+```text
+Verdict: critical
+Violation: no-test-deletion
+Tests: passed
+```
 
-> The agent said it worked. Blackbox shows what actually happened.
+## Why This Exists
 
-## What v0.1 does
+AI coding agents can confidently report success while making unsafe changes: weakening tests, touching secrets, hiding risky shell output, or leaving a repo in a surprising state.
 
-- Wraps a local command with `blackbox run -- <command...>`
-- Streams stdout/stderr live while saving logs
-- Captures `git status` before and after the wrapped command
-- Captures `git diff --binary`
-- Runs a configured test command
-- Evaluates simple local YAML policies
-- Writes append-only-style JSONL events with a SHA-256 hash chain
-- Generates a static `report.html`
-- Verifies the event hash chain with `blackbox verify`
+Agent Blackbox is a local-first evidence pack for those runs. It does not try to be a cloud platform or a full sandbox. It records enough local evidence for a human reviewer to answer: what command ran, what changed, did tests pass, and did any policy rule fire?
 
-## Install for development
+See [FAQ](./docs/faq.md) for short answers on scope, sandboxing, and agent support.
+
+## Quickstart
 
 ```sh
 pnpm install
 pnpm build
 pnpm link --global
+
+cd examples/broken-checkout
+npm install
+git init
+git add .
+git commit -m "demo baseline"
+blackbox init
+blackbox run --test "npm test" -- node ../cheating-agent.js
 ```
 
 Requirements:
@@ -42,73 +51,65 @@ Requirements:
 - pnpm
 - git
 
-## Quickstart
+## Launch Demo
+
+The included demo shows why a passing test suite is not always enough.
+
+The demo project starts with a real bug in `examples/broken-checkout/src/checkout.ts`: the `SAVE10` coupon does not apply a discount, so `npm test` fails. The cheating agent changes `tests/checkout.test.ts` so the suite passes without fixing the source bug.
+
+Run it from a clean checkout:
 
 ```sh
-pnpm install
 pnpm build
-pnpm link --global
-```
-
-To try the included demo:
-
-```sh
 cd examples/broken-checkout
 npm install
 git init
 git add .
 git commit -m "demo baseline"
-blackbox init
-blackbox run --test "npm test" -- node ../cheating-agent.js
+node ../../dist/cli.js init
+node ../../dist/cli.js run --test "npm test" -- node ../cheating-agent.js
 ```
 
-The cheating agent weakens a test so the suite passes. Blackbox should flag that as a critical `no-test-deletion` policy violation.
+Expected result:
 
-Try the honest path from a clean demo checkout:
+```text
+Verdict: critical
+Violation: no-test-deletion
+Tests: passed
+```
+
+The report is written under `.blackbox/runs/<run-id>/report.html`.
+
+From a fresh copy of the demo project, the honest agent fixes the source bug instead:
 
 ```sh
-blackbox run --test "npm test" -- node ../honest-agent.js
+node ../../dist/cli.js run --test "npm test" -- node ../honest-agent.js
 ```
 
-## Launch demo
+That run should pass tests without critical policy violations.
 
-The fastest demo is the intentionally broken checkout example.
-
-The source bug is in `examples/broken-checkout/src/checkout.ts`: the `SAVE10` coupon does not apply a discount, so `npm test` initially fails. The `examples/cheating-agent.js` script simulates a bad AI coding agent by changing the test expectation from `90` to `100`. The test suite then passes, but Agent Blackbox records that a test file changed and flags the run as a critical `no-test-deletion` policy violation.
+## Codex Example
 
 ```sh
-cd examples/broken-checkout
-npm install
-git init
-git add .
-git commit -m "demo baseline"
-blackbox init
-blackbox run --test "npm test" -- node ../cheating-agent.js
-blackbox verify .blackbox/runs/<run-id>
+blackbox run --policy blackbox.yml --test "npm test" -- \
+  codex exec --json --sandbox workspace-write "fix the failing tests"
 ```
 
-From a clean demo checkout, `examples/honest-agent.js` fixes the source bug instead. That run should pass tests without policy violations.
+## What v0.1 Records
 
-## Codex example
+- wrapped command and arguments
+- live terminal output
+- `git status` before and after
+- `git diff --binary`
+- configured test command output and exit code
+- file added/changed/deleted events from git status
+- YAML policy matches
+- hash-chained `events.jsonl`
+- local static `report.html`
 
-```sh
-blackbox run --policy blackbox.yml --test "npm test" -- codex exec --json --sandbox workspace-write "fix the failing tests"
-```
+## Generated Evidence Pack
 
-## CLI
-
-```sh
-blackbox init
-blackbox run [--policy blackbox.yml] [--test "npm test"] [--allow-no-git] -- <command...>
-blackbox report <runDir>
-blackbox verify <runDir>
-```
-
-Every command includes `--help`.
-
-## Generated evidence pack
-
-Each run writes a directory like:
+Each run creates a directory like:
 
 ```text
 .blackbox/runs/2026-05-27T10-21-12-123Z-a1b2c3d4/
@@ -125,7 +126,7 @@ Each run writes a directory like:
   report.html
 ```
 
-`events.jsonl` contains one event per line:
+`events.jsonl` is written one event per line with:
 
 - `seq`
 - `timestamp`
@@ -136,7 +137,13 @@ Each run writes a directory like:
 
 The hash is `sha256` over canonical JSON containing `seq`, `timestamp`, `type`, `data`, and `prevHash`.
 
-## Sample output
+Verify a run:
+
+```sh
+blackbox verify .blackbox/runs/<run-id>
+```
+
+## Sample Output
 
 ```text
 Agent Blackbox run: 2026-05-27T10-21-12-123Z-a1b2c3d4
@@ -149,20 +156,17 @@ Verdict: critical | Risk: critical | Score: 60/100
 Report: /repo/.blackbox/runs/2026-05-27T10-21-12-123Z-a1b2c3d4/report.html
 ```
 
-## Share Weird Agent Behavior
+Scoring starts at 100:
 
-If an agent does something surprising, share the evidence instead of just the agent summary. Good launch-friendly artifacts include:
+- `-50` if tests fail
+- `-40` per critical violation
+- `-20` per high violation
+- `-10` per medium violation
+- minimum score is `0`
 
-- a screenshot of the `report.html` verdict and timeline
-- the policy violation list
-- safe excerpts from `diff.patch`
-- the final score and risk level
+## Policy Format
 
-Please redact secrets, private source code, customer data, credentials, `.env` values, and internal URLs before posting.
-
-## Policy format
-
-`blackbox init` creates a useful default `blackbox.yml`:
+`blackbox init` creates a default `blackbox.yml`:
 
 ```yaml
 project: agent-blackbox-demo
@@ -222,38 +226,58 @@ rules:
     severity: high
 ```
 
-## Scoring
+Policy rules can match file paths with globs or terminal/test output with substring checks. Keep rules explainable from local evidence.
 
-Agent Blackbox starts at 100:
+## CLI Commands
 
-- `-50` if tests fail
-- `-40` per critical violation
-- `-20` per high violation
-- `-10` per medium violation
-- minimum score is `0`
+```sh
+blackbox init
+blackbox run [--policy blackbox.yml] [--test "npm test"] [--allow-no-git] -- <command...>
+blackbox report <runDir>
+blackbox verify <runDir>
+```
 
-Verdicts:
+Every command includes `--help`.
 
-- `clean`: no violations and tests passed
-- `failed`: tests failed and no critical or high policy violation
-- `suspicious`: high or lower policy violation
-- `critical`: at least one critical policy violation
+## Share Weird Agent Behavior
+
+Found an agent doing something suspicious? Run it through Blackbox and share the evidence, not just the agent summary:
+
+- verdict
+- policy violation
+- `report.html` screenshot
+- relevant `diff.patch` excerpt
+
+Redact secrets, private source code, customer data, credentials, `.env` values, and internal URLs before posting.
 
 ## Limitations
-
-v0.1 is intentionally local-first and simple:
 
 - v0.1 records terminal output, git diffs, test results, and policy matches.
 - v0.1 is not a full OS-level sandbox.
 - v0.1 does not guarantee every file read or network call is captured.
-- Does not provide production-grade security
-- Does not include cloud sync, auth, database, or SaaS features
+- A sufficiently adversarial local process may bypass a simple recorder.
+- It does not provide production-grade security.
+- It does not include cloud sync, auth, database, or SaaS features.
 
 ## Roadmap
 
 - Docker sandbox
-- Network policy and allowlist/denylist
+- Network allowlist/denylist
 - OpenTelemetry export
 - GitHub Action
 - Hosted replay
 - Team dashboard
+
+See [ROADMAP.md](./ROADMAP.md).
+
+## Contributing
+
+Contributions are welcome. Start with [CONTRIBUTING.md](./CONTRIBUTING.md), then run:
+
+```sh
+pnpm install
+pnpm build
+pnpm test
+```
+
+Good first areas include agent examples, policy rules, report polish, and CI integrations.
