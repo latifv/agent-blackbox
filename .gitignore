@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.blackbox/
+.blackbox/runs/
+.DS_Store
+coverage/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+examples/**/.blackbox/
+examples/**/.git/
+examples/**/blackbox.yml
+examples/**/package-lock.json

@@ -1,0 +1,50 @@
+project: agent-blackbox-demo
+test:
+  command: "npm test"
+sensitive:
+  paths:
+    - ".env"
+    - ".env.*"
+    - "secrets/**"
+    - "private/**"
+rules:
+  - id: no-test-deletion
+    description: "Agent must not delete or weaken tests to make the suite pass"
+    event:
+      any:
+        - "file.deleted"
+        - "file.changed"
+    path:
+      glob:
+        - "**/*.test.*"
+        - "**/*.spec.*"
+        - "**/__tests__/**"
+    severity: critical
+  - id: no-secret-touch
+    description: "Agent must not touch secret files"
+    event:
+      any:
+        - "file.added"
+        - "file.changed"
+        - "file.deleted"
+    path:
+      glob:
+        - ".env"
+        - ".env.*"
+        - "secrets/**"
+        - "private/**"
+    severity: critical
+  - id: suspicious-shell-output
+    description: "Suspicious shell/network command appeared in terminal output"
+    event:
+      any:
+        - "command.output"
+        - "test.output"
+    contains:
+      any:
+        - "rm -rf"
+        - "curl "
+        - "wget "
+        - "chmod 777"
+        - "base64 -d"
+    severity: high
