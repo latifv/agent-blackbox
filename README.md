@@ -107,6 +107,21 @@ blackbox run --policy blackbox.yml --test "npm test" -- \
   codex exec --json --sandbox workspace-write "fix the failing tests"
 ```
 
+## Claude Code / Claude-Style CLI Example
+
+Use the same wrapper shape for Claude Code or another local Claude-style agent
+CLI. Replace the command after `--` with the non-interactive command supported
+by your local agent installation:
+
+```sh
+blackbox run --test "npm test" -- \
+  claude -p "fix the failing tests without deleting or weakening tests"
+```
+
+Blackbox does not provide model credentials or run a hosted agent for you. It
+records the local command you provide, captures the resulting diff and test
+output, and reports policy violations from that run.
+
 ## What v0.1 Records
 
 - wrapped command and arguments
