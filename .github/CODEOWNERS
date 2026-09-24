@@ -1,0 +1,5 @@
+# Global code owners
+* @latifv @bunyamin-mp
+
+# Protect the ownership policy itself
+/.github/CODEOWNERS @latifv @bunyamin-mp
