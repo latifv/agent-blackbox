@@ -107,6 +107,19 @@ blackbox run --policy blackbox.yml --test "npm test" -- \
   codex exec --json --sandbox workspace-write "fix the failing tests"
 ```
 
+## Claude Code and Other CLI Agents
+
+Any Claude Code or Claude-style agent that runs as a terminal command can be
+wrapped the same way:
+
+```sh
+blackbox run --test "npm test" -- \
+  <claude-agent-command> "fix the failing tests"
+```
+
+See [Agent CLI examples](./docs/agent-cli-examples.md) for command shapes,
+verification steps, and limitations.
+
 ## What v0.1 Records
 
 - wrapped command and arguments

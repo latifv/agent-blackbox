@@ -40,7 +40,8 @@ blackbox run --test "npm test" -- <claude-agent-command> "fix the failing tests"
 ```
 
 This is an example shape, not a claim that every Claude Code workflow has been
-tested.
+tested. See [Agent CLI examples](./agent-cli-examples.md) for a longer
+credential-free example and limitations.
 
 ## Can I use it in CI?
 
