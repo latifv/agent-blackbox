@@ -107,6 +107,29 @@ blackbox run --policy blackbox.yml --test "npm test" -- \
   codex exec --json --sandbox workspace-write "fix the failing tests"
 ```
 
+## Claude Code Example
+
+Agent Blackbox can also wrap Claude Code or another Claude-style local CLI. This
+is an example invocation only; the wrapped agent may require its own installed
+CLI, login state, subscription, API key, or project permissions.
+
+```sh
+blackbox run --policy blackbox.yml --test "npm test" -- \
+  claude "fix the failing tests without weakening test coverage"
+```
+
+If you use a different Claude-compatible command, keep it after `--` so Agent
+Blackbox records the command, terminal output, git diff, and test result for the
+same run:
+
+```sh
+blackbox run --test "npm test" -- \
+  <claude-agent-command> "fix the failing tests"
+```
+
+Agent Blackbox does not provide Claude credentials or sandbox the model provider;
+it records local evidence from the command you choose to run.
+
 ## What v0.1 Records
 
 - wrapped command and arguments
